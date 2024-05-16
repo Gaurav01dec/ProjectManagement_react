@@ -1,6 +1,7 @@
 import ProjectSidebar from "./components/ProjectSidebar.jsx";
 import NewProject from "./components/NewProject.jsx";
 import NoProjectSelected from "./components/NoProjectSelected.jsx";
+import SelectedProject from "./components/SelectedProject.jsx";
 import { useState } from "react";
 
 function App() {
@@ -15,6 +16,24 @@ function App() {
       return {
         ...prevstate,
         selectedProjectID: null,
+      }
+    })
+  }
+
+  function handleSelectProject(id) {
+    setProjectsState(prevstate => {
+      return {
+        ...prevstate,
+        selectedProjectID: id,
+      }
+    })
+  }
+
+  function handleCancelAddProject() {
+    setProjectsState(prevstate => {
+      return {
+        ...prevstate,
+        selectedProjectID: undefined,
       }
     })
   }
@@ -34,17 +53,33 @@ function App() {
     })
   }
 
+  function handleDeleteProject() {
+    setProjectsState(prevstate => {
+      return {
+        ...prevstate,
+        selectedProjectID: undefined,
+        projects: prevstate.projects.filter(
+          (project) => project.id !== prevstate.selectedProjectID
+        )
+      }
+    })
+  }
 
-  let content;
+  const selectedProject = projectsState.projects.find(project => project.id === projectsState.selectedProjectID)
+
+  let content = <SelectedProject project={selectedProject} onDelete={handleDeleteProject} />;
   if (projectsState.selectedProjectID === null) {
-    content = <NewProject onAdd={handleAddProject} />
+    content = <NewProject onAdd={handleAddProject} onCancel={handleCancelAddProject} />
   } else if (projectsState.selectedProjectID === undefined) {
     content = <NoProjectSelected onStartAddProject={handleStartAddProject} />
   }
 
   return (
     <main className="h-screen my-8 flex gap-8">
-      <ProjectSidebar onStartAddProject={handleStartAddProject} projects={projectsState.projects}/>
+      <ProjectSidebar
+        onStartAddProject={handleStartAddProject}
+        projects={projectsState.projects}
+        onSelectProject={handleSelectProject} />
       {content}
     </main>
   );
